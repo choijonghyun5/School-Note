@@ -59,7 +59,7 @@ function evSheet(id,def){
    const r={id:id||'u'+Date.now(),n,d:s1,e:e1,c};
    MY=id?MY.map(v=>v.id===id?r:v):[...MY,r];st.set('myev',MY);
    selDay=pd(s1);cl();render(true)}};
- o.onkeydown=ev=>{if(ev.key==='Enter'&&ev.target.tagName==='INPUT')o.querySelector('[data-x=s]').click();if(ev.key==='Escape')cl()};
+ o.onkeydown=ev=>{if(ev.key==='Enter'&&!ev.isComposing&&ev.keyCode!==229&&ev.target.tagName==='INPUT')o.querySelector('[data-x=s]').click();if(ev.key==='Escape')cl()};
 }
 let view='home',selDay=new Date(),wkStart=mon(new Date()),cache={};
 let AL=st.get('alias',{}),TM=st.get('times',{}),CL=st.get('subcls',{});
@@ -72,7 +72,7 @@ function sheet(t,sub,body,save,reset){
  document.body.appendChild(o);
  const cl=()=>o.remove(),i=o.querySelector('input');if(i){i.focus();i.select&&i.select()}
  o.onclick=e=>{const x=e.target.dataset.x;if(e.target===o||x==='c')cl();else if(x==='s'){save(o);cl();render(true)}else if(x==='r'){reset();cl();render(true)}};
- o.onkeydown=e=>{if(e.key==='Enter')o.querySelector('[data-x=s]').click();if(e.key==='Escape')cl()};
+ o.onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229)o.querySelector('[data-x=s]').click();if(e.key==='Escape')cl()};
 }
 function editName(raw){
  sheet('과목 설정',`원래 이름 · ${esc(raw)}<br>이름과 반은 같은 과목의 다른 날에도 같이 적용돼요`,
@@ -215,15 +215,15 @@ async function calv(){
  ${sel}
  <button class="add" data-add="${sk}">＋ 일정 추가</button>
  <div class="lb" style="margin:40px 0 8px">${mo+1}월 전체 일정</div><div>${list}</div>
- <div class="ft">데이터 출처: NEIS 교육행정정보시스템 · 모의고사 일정은 교육청·평가원 공고 기준이에요<br>내가 추가한 일정은 눌러서 수정·삭제할 수 있어요</div>`;
+ <div class="ft">내가 추가한 일정은 눌러서 수정·삭제할 수 있어요</div>`;
 }
 
 function settings(){
  return `<div class="lb">${ok()?'SETTINGS':'WELCOME'}</div><h2 style="margin-top:10px">${ok()?'설정':'학교를 선택해 주세요'}</h2>
  <div class="sel"><div class="sub">${ok()?esc(S.name)+' · '+S.grade+'학년 '+S.cls+'반':'학교 이름을 검색하고 학년·반을 저장하면 시간표와 급식이 나타나요.'}</div></div>
- <div class="f"><input id="q" placeholder="학교 이름" aria-label="학교 이름"><button class="bt" id="sr">검색</button></div><div class="li" id="rs"></div>
+ <div class="f"><input id="q" type="text" placeholder="학교 이름" aria-label="학교 이름" enterkeyhint="search" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><button class="bt" id="sr">검색</button></div><div class="li" id="rs"></div>
  <div class="f"><input class="s num" id="g" inputmode="numeric" value="${S.grade}" aria-label="학년"><span class="sub" style="align-self:center">학년</span><input class="s num" id="c" inputmode="numeric" value="${S.cls}" aria-label="반"><span class="sub" style="align-self:center">반</span><button class="bt" id="sv" style="margin-left:auto">저장</button></div>
- <div class="ft">수업 시간은 09:10 시작 기준 안내 시간이에요. 데이터 출처: NEIS 교육행정정보시스템</div>`;
+ `;
 }
 
 async function render(keep){
@@ -253,8 +253,14 @@ function bindSet(){
    $('#rs').innerHTML=r.length?r.map((s,i)=>`<button data-i="${i}">${esc(s.SCHUL_NM)}<small>${esc(s.SCHUL_KND_SC_NM)} · ${esc(s.ORG_RDNMA||'')}</small></button>`).join(''):'<div class="em">검색 결과가 없어요. 학교 이름을 다시 확인해 주세요.</div>';
    $('#rs').onclick=e=>{const b=e.target.closest('button');if(!b)return;const s=r[b.dataset.i];S={...S,edu:s.ATPT_OFCDC_SC_CODE,code:s.SD_SCHUL_CODE,name:s.SCHUL_NM,kind:s.SCHUL_KND_SC_NM};$('#rs').innerHTML=`<div class="em"><b>${esc(s.SCHUL_NM)}</b>선택했어요. 학년·반을 입력하고 저장하세요.</div>`}
   }catch(e){$('#rs').innerHTML='<div class="em">검색하지 못했어요. 연결을 확인해 주세요.</div>'}};
- if(!ok())$('#q').focus();
- $('#sr').onclick=go;$('#q').onkeydown=e=>e.key==='Enter'&&go();
+ 
+ $('#sr').onclick=go;$('#q').onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229){e.preventDefault();e.target.blur();go()}};
  $('#sv').onclick=()=>{S.grade=+$('#g').value||1;S.cls=+$('#c').value||1;st.set('cfg',S);cache={};view='home';render()};
 }
 render();
+
+/* 확대 방지: iOS는 user-scalable=no를 무시하므로 제스처를 직접 차단 */
+['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,e=>e.preventDefault()));
+document.addEventListener('touchmove',e=>{if(e.touches.length>1)e.preventDefault()},{passive:false});
+let _lt=0;document.addEventListener('touchend',e=>{const n=Date.now();if(n-_lt<300&&!e.target.closest('input,textarea'))e.preventDefault();_lt=n},{passive:false});
+document.addEventListener('dblclick',e=>e.preventDefault());

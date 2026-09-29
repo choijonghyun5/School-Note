@@ -137,3 +137,8 @@ input{color-scheme:light dark}
 .add:active{opacity:.5}
 .cg button.ex:after{width:6px;height:6px;margin-left:-3px;bottom:6px;background:var(--tx)}
 .cg button.ex.on:after{background:var(--bg)}
+
+input{-webkit-appearance:none;appearance:none;border-radius:0;-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;touch-action:manipulation}
+.f input{font-size:17px;min-height:48px}
+
+html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
