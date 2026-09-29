@@ -2,6 +2,8 @@ const KEY='0e7e8e819f064a4db26b423a6b3b29e8';
 const $=s=>document.querySelector(s);
 const st={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 let S=st.get('cfg',{grade:1,cls:6});
+const isDark=()=>{const t=document.documentElement.dataset.theme;return t?t==='dark':matchMedia('(prefers-color-scheme:dark)').matches};
+{const t=st.get('theme',null);if(t)document.documentElement.dataset.theme=t}
 const E=['SUN','MON','TUE','WED','THU','FRI','SAT'],K=['일','월','화','수','목','금','토'];
 const PT=['09:10','10:10','11:10','12:10','13:50','14:50','16:00','16:50'];
 const p2=n=>String(n).padStart(2,'0');
@@ -153,8 +155,7 @@ async function home(){
 async function tt(){
  if(!ok())return setup();
  const w=await week(wkStart),days=[0,1,2,3,4].map(i=>add(wkStart,i)),td=ymd(new Date());
- if([...Object.keys(w.tt)].some(d=>new Date(d.slice(0,4),d.slice(4,6)-1,d.slice(6)).getDay()===6))days.push(add(wkStart,5));
- const mx=Math.max(w.max,7);let anyCh=0;
+  const mx=Math.max(w.max,7);let anyCh=0;
  const head=days.map(d=>{const o=offOf(w,d);return `<th class="${ymd(d)===td?'today':''}">${K[d.getDay()]}<em class="num">${md(d)}</em></th>`}).join('');
  let rows='';
  for(let p=1;p<=mx;p++){rows+=`<tr><td class="p num" data-t="${p}">${p}<small>${tm(p)[0]}</small></td>`+days.map(d=>{
@@ -215,7 +216,7 @@ async function calv(){
  ${sel}
  <button class="add" data-add="${sk}">＋ 일정 추가</button>
  <div class="lb" style="margin:40px 0 8px">${mo+1}월 전체 일정</div><div>${list}</div>
- <div class="ft">데이터 출처: NEIS 교육행정정보시스템 · 모의고사 일정은 교육청·평가원 공고 기준이에요<br>내가 추가한 일정은 눌러서 수정·삭제할 수 있어요</div>`;
+ <div class="ft">내가 추가한 일정은 눌러서 수정·삭제할 수 있어요</div>`;
 }
 
 function settings(){
@@ -223,7 +224,7 @@ function settings(){
  <div class="sel"><div class="sub">${ok()?esc(S.name)+' · '+S.grade+'학년 '+S.cls+'반':'학교 이름을 검색하고 학년·반을 저장하면 시간표와 급식이 나타나요.'}</div></div>
  <div class="f"><input id="q" type="text" placeholder="학교 이름" aria-label="학교 이름" enterkeyhint="search" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><button class="bt" id="sr">검색</button></div><div class="li" id="rs"></div>
  <div class="f"><input class="s num" id="g" inputmode="numeric" value="${S.grade}" aria-label="학년"><span class="sub" style="align-self:center">학년</span><input class="s num" id="c" inputmode="numeric" value="${S.cls}" aria-label="반"><span class="sub" style="align-self:center">반</span><button class="bt" id="sv" style="margin-left:auto">저장</button></div>
- <div class="ft">수업 시간은 09:10 시작 기준 안내 시간이에요. 데이터 출처: NEIS 교육행정정보시스템</div>`;
+ <button class="tg" id="dk" role="switch" aria-checked="${isDark()}"><span>다크 모드</span><i></i></button>`;
 }
 
 async function render(keep){
@@ -254,6 +255,7 @@ function bindSet(){
    $('#rs').onclick=e=>{const b=e.target.closest('button');if(!b)return;const s=r[b.dataset.i];S={...S,edu:s.ATPT_OFCDC_SC_CODE,code:s.SD_SCHUL_CODE,name:s.SCHUL_NM,kind:s.SCHUL_KND_SC_NM};$('#rs').innerHTML=`<div class="em"><b>${esc(s.SCHUL_NM)}</b>선택했어요. 학년·반을 입력하고 저장하세요.</div>`}
   }catch(e){$('#rs').innerHTML='<div class="em">검색하지 못했어요. 연결을 확인해 주세요.</div>'}};
  
+ $('#dk').onclick=()=>{const t=isDark()?'light':'dark';document.documentElement.dataset.theme=t;st.set('theme',t);$('#dk').setAttribute('aria-checked',t==='dark')};
  $('#sr').onclick=go;$('#q').onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229){e.preventDefault();e.target.blur();go()}};
  $('#sv').onclick=()=>{S.grade=+$('#g').value||1;S.cls=+$('#c').value||1;st.set('cfg',S);cache={};view='home';render()};
 }
