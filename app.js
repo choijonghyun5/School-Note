@@ -147,7 +147,7 @@ async function home(){
  const cards=off?'':ps.map(p=>{const c=w.ch[k]&&w.ch[k][p],[a,b]=tm(p),e=b?mins(b):mins(a||'23:59')+50;
   return `<div class="r ${p===cur?'on':''} ${e<=now?'past':''}"><i class="num">${p2(p)}</i><div class="nm" data-s="${esc(t[p])}"><b>${esc(nm(t[p]))}${c?'<span class="tag">변경</span>':''}${cn(t[p])?`<span class="tag">${esc(cn(t[p]))}</span>`:''}</b>${c?`<small>원래 ${esc(nm(c))}</small>`:''}</div><div class="tm num" data-t="${p}">${a?a+' — '+b:'시간 설정'}</div></div>`}).join('');
  $('#side').innerHTML=`<div class="ai"><div class="lb">오늘의 급식</div><div style="margin-top:14px">${meal(w,n)}</div></div>`;
- return `<div class="top"><div class="tl"><div class="dt num">${K[n.getDay()]}요일 · ${md(n)}</div><div class="hero">${hero}</div></div>${mw}</div>${ev.length?`<div class="note"><b>학사일정</b>${ev.map(x=>esc(x.n)).join(', ')}</div>`:''}${nextEx()}<div class="rows">${cards}</div>${cards?'<div class="ft">과목 이름이나 시간을 눌러 수정할 수 있어요</div>':''}`;
+ return `<div class="top"><div class="tl"><div class="dt num">${K[n.getDay()]}요일 · ${md(n)}</div><div class="hero">${hero}</div></div>${mw}</div>${ev.length?`<div class="note"><b>학사일정</b>${ev.map(x=>esc(x.n)).join(', ')}</div>`:''}<div class="rows">${cards}</div>${cards?'<div class="ft">과목 이름이나 시간을 눌러 수정할 수 있어요</div>':''}`;
 }
 
 async function tt(){
@@ -215,7 +215,7 @@ async function calv(){
  ${sel}
  <button class="add" data-add="${sk}">＋ 일정 추가</button>
  <div class="lb" style="margin:40px 0 8px">${mo+1}월 전체 일정</div><div>${list}</div>
- <div class="ft">내가 추가한 일정은 눌러서 수정·삭제할 수 있어요</div>`;
+ <div class="ft">데이터 출처: NEIS 교육행정정보시스템 · 모의고사 일정은 교육청·평가원 공고 기준이에요<br>내가 추가한 일정은 눌러서 수정·삭제할 수 있어요</div>`;
 }
 
 function settings(){
@@ -223,12 +223,12 @@ function settings(){
  <div class="sel"><div class="sub">${ok()?esc(S.name)+' · '+S.grade+'학년 '+S.cls+'반':'학교 이름을 검색하고 학년·반을 저장하면 시간표와 급식이 나타나요.'}</div></div>
  <div class="f"><input id="q" type="text" placeholder="학교 이름" aria-label="학교 이름" enterkeyhint="search" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><button class="bt" id="sr">검색</button></div><div class="li" id="rs"></div>
  <div class="f"><input class="s num" id="g" inputmode="numeric" value="${S.grade}" aria-label="학년"><span class="sub" style="align-self:center">학년</span><input class="s num" id="c" inputmode="numeric" value="${S.cls}" aria-label="반"><span class="sub" style="align-self:center">반</span><button class="bt" id="sv" style="margin-left:auto">저장</button></div>
- `;
+ <div class="ft">수업 시간은 09:10 시작 기준 안내 시간이에요. 데이터 출처: NEIS 교육행정정보시스템</div>`;
 }
 
 async function render(keep){
  if(!ok())view='set';
- nav();const v=$('#v');v.classList.toggle('wide',view==='tt');
+ nav();const v=$('#v');v.classList.toggle('wide',view==='tt');v.classList.toggle('hm',view==='home');
  if(!keep){v.style.animation='none';void v.offsetWidth;v.style.animation='';v.innerHTML='<div class="em">불러오는 중…</div>'}
  try{v.innerHTML=await({home,tt,meal:mealv,cal:calv,set:async()=>settings()}[view])()}
  catch(e){v.innerHTML='<div class="em"><b>데이터를 불러오지 못했어요</b>인터넷 연결을 확인하고 다시 시도해 주세요.</div>'}

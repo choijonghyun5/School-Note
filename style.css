@@ -142,3 +142,17 @@ input{-webkit-appearance:none;appearance:none;border-radius:0;-webkit-user-selec
 .f input{font-size:17px;min-height:48px}
 
 html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+
+/* 홈: 한 화면에 7교시까지 */
+main.hm{padding-top:14px;padding-bottom:104px}
+main.hm .hero{margin:4px 0 14px}
+main.hm .hero .lb{margin-bottom:4px}
+main.hm h1{font-size:34px;margin:2px 0 2px}
+main.hm .sub{font-size:14px}
+main.hm .note{margin:0 0 12px;padding:9px 0;font-size:13px}
+main.hm .rows{gap:6px}
+main.hm .r{padding:8px 16px;border-radius:14px}
+main.hm .r .nm{padding:0}
+main.hm .r .nm b{font-size:16px}
+main.hm .r .nm small{font-size:11px}
+main.hm .ft{margin-top:12px}
